@@ -16,7 +16,7 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 // Parse request body as JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.enging("handlerbars", exphbs({ defaultLayout: "main" }));
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 // Make public a static folder
 app.use(express.static("public"));
@@ -57,7 +57,15 @@ app.get("/scrape", function (req, res) {
                     console.log(err);
                 });
         });
-        res.send("Scrape Complete");
+        res.render("scrape");
+    });
+});
+
+app.get("/clear", function(req, res){
+
+    db.Article.remove({})
+    .then(function(){
+        res.render("clear")
     });
 });
 
@@ -66,13 +74,37 @@ app.get("/articles", function(req, res){
     db.Article.find({})
     .then(function(dbArticle){
 
-        res.json(dbArticle);
+        let hbsObject = {
+            article: dbArticle
+        };
+
+        res.render("articles", hbsObject);
     })
     .catch(function(err){
 
         res.json(err);
     });
 });
+
+app.post("/articles/:id", function(req, res) {
+    // TODO
+    // ====
+    // save the new note that gets posted to the Notes collection
+    db.Comment.create(req.body)
+    // then find an article from the req.params.id
+    .then(function(dbComment){
+   // and update it's "note" property with the _id of the new note
+      return db.Article.findOneAndUpdate({ _id: (req.params.id) }, { comment: dbComment.id }, { new: true });
+    })
+    .then(function(dbArticle){
+  
+      res.json(dbArticle);
+    })
+    .catch(function(err){
+  
+      res.json(err);
+    });
+  });
 
 app.listen(PORT, function() {
     console.log("App running on port " + PORT + "!");
