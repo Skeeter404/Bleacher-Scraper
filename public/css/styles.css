@@ -41,6 +41,21 @@
     margin-top: 10px;
 }
 
+#submit-comment {
+    margin-bottom: 10px;
+}
+
+.each-comment {
+    border-radius: 10px;
+    background-color: rgba(66, 66, 66, 0.747);
+    border: solid black;
+}
+
+#delete-comment {
+    border-radius: 50%;
+    background-color: #00695c;
+}
+
 body {
     display: flex;
     min-height: 100vh;

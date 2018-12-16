@@ -72,6 +72,7 @@ app.get("/clear", function(req, res){
 app.get("/articles", function(req, res){
 
     db.Article.find({})
+    .populate("comment")
     .then(function(dbArticle){
 
         let hbsObject = {
@@ -87,18 +88,30 @@ app.get("/articles", function(req, res){
 });
 
 app.post("/articles/:id", function(req, res) {
-    // TODO
-    // ====
     // save the new note that gets posted to the Notes collection
     db.Comment.create(req.body)
     // then find an article from the req.params.id
     .then(function(dbComment){
    // and update it's "note" property with the _id of the new note
-      return db.Article.findOneAndUpdate({ _id: (req.params.id) }, { comment: dbComment.id }, { new: true });
+      return db.Article.findOneAndUpdate({ _id: (req.params.id) }, { $push: {comment: dbComment.id} }, { new: true });
     })
     .then(function(dbArticle){
   
       res.json(dbArticle);
+    })
+    .catch(function(err){
+  
+      res.json(err);
+    });
+  });
+
+  app.delete("/comments/:id", function(req, res) {
+
+    db.Comment.findOneAndRemove({ _id: req.params.id })
+    
+    .then(function(dbComment){
+   
+      res.json(dbComment);
     })
     .catch(function(err){
   
